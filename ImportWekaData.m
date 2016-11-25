@@ -42,43 +42,43 @@ for i=1:numAttr
     data(:,i) = D.attributeToDoubleArray(i-1);
 end
 
+
+fdata = filteredZeros(data, numAttr, numInst);
+fdata = filteredMean(data, numAttr, numInst);
 %convert outliers to mean:
-%go thru data row by ro
-for i=1:numInst
-    rowMean = 0;
-    n = 0;
-    
-    %calculate filtered mean for row i
-    for j=1:numAttr
-        if data(i,j) < 100
-            rowMean = rowMean + data(i,j);
-            n = n+1;       
-        end   
-    end
-    rowMean = rowMean / n;       %filtered avg
-    
-    %replace row i's outliers with mean
-    for j=1:numAttr
-        if data(i,j) > 100
-            data(i,j) = rowMean;
+%go thru data row by row
+function filteredMean(data, numAttr, numInst)
+    for i=1:numInst
+        rowMean = 0;
+        n = 0;
+
+        %calculate filtered mean for row i
+        for j=1:numAttr
+            if data(i,j) < 100
+                rowMean = rowMean + data(i,j);
+                n = n+1;       
+            end   
+        end
+        rowMean = rowMean / n;       %filtered avg
+
+        %replace row i's outliers with mean
+        for j=1:numAttr
+            if data(i,j) > 100
+                data(i,j) = rowMean;
+            end
         end
     end
 end
 
-%## instances
-data = zeros(numInst,numAttr);
-temp = zeros(numInst,1);
-for i=1:numAttr
-    %data(:,i) = D.attributeToDoubleArray(i-1);
-    temp = D.attributeToDoubleArray(i-1);
-    for j=1:numInst
-        if temp(j) > 100
-            data(j,i) = 0; 
-        else
-                        
-        end
-        
-    end
-        
-        
+
+
+%replaces all magnitudes greater than 100 w/zero
+function data = filteredZeros(data, numAttr, numInst)
+    for i=1:numInst
+       for j=1:numAttr
+           if data(i,j) > 100
+               data(i,j) = 0;            
+           end
+       end
+   end
 end
