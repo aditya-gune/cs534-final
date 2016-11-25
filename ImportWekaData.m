@@ -36,7 +36,18 @@ end
 
 %## instances
 data = zeros(numInst,numAttr);
+temp = zeros(numInst,1);
 for i=1:numAttr
-    data(:,i) = D.attributeToDoubleArray(i-1);
+    %data(:,i) = D.attributeToDoubleArray(i-1);
+    temp = D.attributeToDoubleArray(i-1);
+    for j=1:numInst
+        if temp(j) > 100
+            data(j,i) = 0; 
+        else
+                        
+        end
+        
+    end
+        
+        
 end
-
