@@ -34,6 +34,37 @@ for i=1:numAttr
     end
 end
 
+
+
+data = zeros(numInst,numAttr);
+temp = zeros(numInst,1);
+for i=1:numAttr
+    data(:,i) = D.attributeToDoubleArray(i-1);
+end
+
+%convert outliers to mean:
+%go thru data row by ro
+for i=1:numInst
+    rowMean = 0;
+    n = 0;
+    
+    %calculate filtered mean for row i
+    for j=1:numAttr
+        if data(i,j) < 100
+            rowMean = rowMean + data(i,j);
+            n = n+1;       
+        end   
+    end
+    rowMean = rowMean / n;       %filtered avg
+    
+    %replace row i's outliers with mean
+    for j=1:numAttr
+        if data(i,j) > 100
+            data(i,j) = rowMean;
+        end
+    end
+end
+
 %## instances
 data = zeros(numInst,numAttr);
 temp = zeros(numInst,1);
