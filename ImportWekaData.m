@@ -34,51 +34,85 @@ for i=1:numAttr
     end
 end
 
-
-
+%instances
 data = zeros(numInst,numAttr);
-temp = zeros(numInst,1);
 for i=1:numAttr
     data(:,i) = D.attributeToDoubleArray(i-1);
+    
+end
+for i=1:numInst
+    data(i,numAttr) = D.classAttribute()
 end
 
-
 fdata = filteredZeros(data, numAttr, numInst);
-fdata = filteredMean(data, numAttr, numInst);
+meanVector = zeros(numInst,1);
+[fdata, meanVector] = filteredMean(data, meanVector, numAttr, numInst);
+
+trainMean = [];
+testMean = [];
+percent = 30;
+[trainMean, testMean] = splitData(meanVector, testMean, trainMean, numInst, percent);
+
+%Output file for weak
+csvwrite('trainAverages.csv', trainMean)
+csvwrite('testAverages.csv', testMean)
+
 %convert outliers to mean:
 %go thru data row by row
-function filteredMean(data, numAttr, numInst)
+function [data, meanVector] = filteredMean(data, meanVector, numAttr, numInst)
     for i=1:numInst
         rowMean = 0;
         n = 0;
-
         %calculate filtered mean for row i
         for j=1:numAttr
-            if data(i,j) < 100
+            %test if we need to remove 0's
+            if data(i,j) < 100 %&& data(i,j) > 0
                 rowMean = rowMean + data(i,j);
                 n = n+1;       
-            end   
+            end
+            
         end
+        
         rowMean = rowMean / n;       %filtered avg
-
+        %update mean vector 
+        %meanVector(i, 1) = rowMean;
+       
+        %meanVector(i, 2) = 
         %replace row i's outliers with mean
         for j=1:numAttr
             if data(i,j) > 100
                 data(i,j) = rowMean;
             end
         end
-    end
+    end  
 end
-
 
 
 %replaces all magnitudes greater than 100 w/zero
 function data = filteredZeros(data, numAttr, numInst)
+	for i=1:numInst
+        for j=1:numAttr
+            if data(i,j) > 100
+                data(i,j) = 0;            
+            end
+        end
+    end
+end
+
+%splits data into test data and train data, percent is percentage of 
+% data desired for testing (percent = 30, 30% is test data)
+function [testMean, trainMean] = splitData(data, testMean, trainMean, numInst, percent)
+    numTest = (percent/100)*numInst;
+    %r = randi([1 int32(numInst)], 1, int32(numTest));
+    r = randperm(int32(numInst), int32(numTest));
     for i=1:numInst
-       for j=1:numAttr
-           if data(i,j) > 100
-               data(i,j) = 0;            
-           end
+        %if we do not find i in r
+       if sum(find(i==r)) == 0
+            %testData = [testData; data(i,:)];
+            testMean = [testMean;data(i)];
+       else
+           %trainData = [trainData; data(i,:)];
+           trainMean = [trainMean;data(i)];
        end
-   end
+    end
 end
